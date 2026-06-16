@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#050505">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M25,18 C30,8 58,10 62,22 C66,34 50,35 43,35 C34,35 32,30 38,26 C44,22 56,23 60,34 C62,44 44,46 36,46 C25,46 24,58 35,60 C46,62 64,58 67,45 C70,32 52,32 40,33' stroke='%23ff003c' stroke-width='10' fill='none' stroke-linecap='round' stroke-linejoin='round' /%3E%3C/svg%3E">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Syne:wght@700;800&family=Space+Grotesk:wght@300;400;500&display=swap');
+
+        :root {
+            --bg-color: #050505;
+            --text-main: #ffffff;
+            --text-muted: #888888;
+            --accent-color: #ff003c; 
+            --border-thick: 3px solid #ffffff;
+            --font-display: 'Syne', sans-serif;
+            --font-headers: 'Oswald', sans-serif;
+            --font-sans: 'Space Grotesk', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            overflow-x: hidden;
+            width: 100%;
+        }
+
+        body.locked {
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* ==========================================================================
+           --- FIXED LAYERED WELCOME GATE ---
+           ========================================================================== */
+        .welcome-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000000;
+            z-index: 100000;
+            transition: transform 0.8s cubic-bezier(0.85, 0, 0.15, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .welcome-screen.slide-up {
+            transform: translateY(-100%);
+        }
+
+        .welcome-composition-grid {
+            position: relative;
+            width: 100%;
+            max-width: 1400px;
+            height: 100%;
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            grid-template-rows: repeat(12, 1fr);
+            padding: 40px;
+            align-items: center;
+        }
+
+        .layer-img-back {
+            grid-column: 2 / span 5;
+            grid-row: 2 / span 9;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: grayscale(1) contrast(1.4) brightness(0.3);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .layer-img-front {
+            grid-column: 8 / span 4;
+            grid-row: 4 / span 7;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: grayscale(1) contrast(1.6) brightness(0.6);
+            border: var(--border-thick);
+            box-shadow: 15px 15px 0px var(--accent-color);
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        .welcome-center-stage {
+            grid-column: 3 / span 8;
+            grid-row: 5 / span 4;
+            text-align: center;
+            z-index: 4;
+            background: rgba(0, 0, 0, 0.85);
+            padding: 40px;
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .welcome-title {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 5vw, 4.5rem);
+            font-weight: 800;
+            text-transform: uppercase;
+            line-height: 0.95;
+            letter-spacing: -1px;
+            color: #ffffff;
+            margin-bottom: 30px;
+        }
+
+        .welcome-title span { color: var(--accent-color); }
+
+        .enter-btn {
+            background: #ffffff;
+            color: #000000;
+            border: none;
+            padding: 18px 50px;
+            font-family: var(--font-headers);
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.2s ease;
+        }
+
+        .enter-btn:hover {
+            background: var(--accent-color);
+            color: #ffffff;
+            transform: translateY(-2px);
+        }
+
+        /* ==========================================================================
+           --- COUTYARD NAVIGATION & STRUCTURAL LAYOUTS ---
+           ========================================================================== */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 5%;
+            background: rgba(5, 5, 5, 0.95);
+            z-index: 100;
+            border-bottom: var(--border-thick);
+        }
+
+        .logo {
+            font-family: var(--font-display);
+            font-size: 1.8rem;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+            display: inline-flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .logo-icon {
+            width: 42px;
+            height: 42px;
+            fill: var(--accent-color);
+            flex-shrink: 0;
+        }
+
+        .logo-text {
+            display: inline-block;
+            font-size: 1.05rem;
+            letter-spacing: -0.5px;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: var(--text-main);
+            margin-left: 30px;
+            font-family: var(--font-headers);
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        nav a:hover, nav a.highlight { color: var(--accent-color); }
+
+        .hero-section {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 5%;
+            border-bottom: var(--border-thick);
+            margin-top: 40px;
+        }
+
+        .hero-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 1300px;
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            align-items: center;
+        }
+
+        .hero-image {
+            grid-column: 2 / span 7;
+            width: 100%;
+            height: 65vh;
+            object-fit: cover;
+            filter: grayscale(1) contrast(1.3);
+            border: var(--border-thick);
+        }
+
+        .hero-title {
+            grid-column: 6 / span 7;
+            z-index: 2;
+            font-family: var(--font-display);
+            font-size: 8vw;
+            line-height: 0.85;
+            text-transform: uppercase;
+            color: var(--text-main);
+            mix-blend-mode: difference;
+            pointer-events: none;
+        }
+
+        .ticker-wrap {
+            background: var(--accent-color);
+            overflow: hidden;
+            white-space: nowrap;
+            padding: 15px 0;
+            border-bottom: var(--border-thick);
+        }
+
+        .ticker-move {
+            display: inline-block;
+            animation: marquee 25s linear infinite;
+            font-family: var(--font-headers);
+            font-size: 1.8rem;
+            text-transform: uppercase;
+            letter-spacing: 6px;
+        }
+
+        @keyframes marquee {
+            0% { transform: translateX(0%); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* --- PORTFOLIO SYSTEM ARCHIVE --- */
+        .portfolio-section {
+            padding: 100px 5%;
+            border-bottom: var(--border-thick);
+        }
+
+        .section-headline {
+            font-family: var(--font-display);
+            font-size: 4vw;
+            text-transform: uppercase;
+            margin-bottom: 60px;
+        }
+
+        .editorial-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 40px;
+        }
+
+        .album-card {
+            background: #111;
+            border: var(--border-thick);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .album-card img {
+            width: 100%;
+            height: 480px;
+            object-fit: cover;
+            display: block;
+            filter: grayscale(1);
+        }
+
+        .album-meta {
+            padding: 20px;
+            background: #000;
+            border-top: var(--border-thick);
+        }
+
+        .album-tag {
+            font-family: var(--font-headers);
+            font-size: 1.5rem;
+            text-transform: uppercase;
+        }
+
+        .card-large { grid-column: span 7; }
+        .card-small { grid-column: span 5; }
+
+        /* ==========================================================================
+           --- REPLACED VIDEO SECTION: BRUTALIST SLIDESHOW ENGINE ---
+           ========================================================================== */
+        .slideshow-section {
+            padding: 100px 5%;
+            border-bottom: var(--border-thick);
+            background: #000;
+        }
+
+        .slider-container {
+            width: 100%;
+            height: 75vh;
+            border: var(--border-thick);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.6s cubic-bezier(0.85, 0, 0.15, 1);
+        }
+
+        .slide.active { opacity: 1; }
+
+        .slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: grayscale(1) contrast(1.2);
+        }
+
+        .slider-nav {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 10;
+        }
+
+        .slider-btn {
+            background: #000000;
+            color: #ffffff;
+            border: 2px solid #ffffff;
+            padding: 15px 25px;
+            font-family: var(--font-headers);
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s steps(2);
+        }
+
+        .slider-btn:hover {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+
+        .slider-counter {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            background: #000;
+            padding: 10px 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+            font-family: var(--font-headers);
+            font-size: 1.5rem;
+            z-index: 10;
+            letter-spacing: 2px;
+        }
+
+        /* ==========================================================================
+           --- LOOKBOOK STUDIO SYSTEM GENERATOR (VERIFIED VISUAL PREVIEW) ---
+           ========================================================================== */
+        .studio-section {
+            padding: 100px 5%;
+            background: #0f0f0f;
+            border-bottom: var(--border-thick);
+        }
+
+        .studio-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            margin-top: 40px;
+        }
+
+        .studio-controls {
+            background: #000000;
+            border: var(--border-thick);
+            padding: 40px;
+        }
+
+        .control-group { margin-bottom: 25px; }
+        .control-group label {
+            display: block;
+            font-family: var(--font-headers);
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .control-group input, .control-group select {
+            width: 100%;
+            padding: 15px;
+            background: #151515;
+            border: 2px solid #333;
+            color: #fff;
+            font-family: var(--font-sans);
+            font-size: 1rem;
+        }
+
+        .control-group input:focus, .control-group select:focus {
+            border-color: var(--accent-color);
+            outline: none;
+        }
+
+        .asset-selector-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .asset-option {
+            border: 2px solid #333;
+            cursor: pointer;
+            position: relative;
+            height: 110px;
+            background: #222;
+        }
+
+        .asset-option img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: grayscale(1);
+        }
+
+        .asset-option.selected { border-color: var(--accent-color); }
+        .asset-option.selected::after {
+            content: 'SELECTED';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: var(--accent-color);
+            color: #fff;
+            font-family: var(--font-headers);
+            font-size: 0.65rem;
+            text-align: center;
+            padding: 2px 0;
+        }
+
+        .action-btn {
+            width: 100%;
+            background: var(--text-main);
+            color: #000;
+            padding: 20px;
+            font-family: var(--font-headers);
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            cursor: pointer;
+            font-weight: 700;
+            border: none;
+            transition: background 0.2s;
+        }
+
+        .action-btn:hover { background: var(--accent-color); color: #fff; }
+
+        /* Studio Live Preview Box Output Container */
+        .studio-preview-box {
+            border: 4px dashed #444;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: #050505;
+            min-height: 550px;
+        }
+
+        .preview-placeholder {
+            text-align: center;
+            color: var(--text-muted);
+            font-family: var(--font-headers);
+            font-size: 1.5rem;
+            text-transform: uppercase;
+        }
+
+        .user-generated-lookbook { width: 100%; }
+        .user-generated-lookbook .user-title-output {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            text-transform: uppercase;
+            border-bottom: var(--border-thick);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            line-height: 1;
+        }
+
+        .user-media-frame {
+            border: var(--border-thick);
+            margin-bottom: 20px;
+            width: 100%;
+            height: 380px;
+            background: #111;
+            overflow: hidden;
+        }
+
+        .user-media-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .user-desc-output {
+            font-size: 1rem;
+            color: #dddddd;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            line-height: 1.4;
+        }
+
+        /* --- IMMERSIVE EXPANSION MODAL OVERLAY --- */
+        .world-portal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background-color: #000000;
+            z-index: 110000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s ease, visibility 0.4s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .world-portal.active { opacity: 1; visibility: visible; }
+        .portal-header {
+            width: 100%;
+            padding: 25px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: var(--border-thick);
+            background: #000;
+        }
+
+        .portal-project-title { font-family: var(--font-display); font-size: 2.2rem; text-transform: uppercase; }
+        .portal-close-btn {
+            background: transparent;
+            color: #fff;
+            border: var(--border-thick);
+            padding: 10px 25px;
+            font-family: var(--font-headers);
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+        .portal-close-btn:hover { background: var(--accent-color); }
+
+        .portal-scroll-body { flex: 1; overflow-y: auto; padding: 60px 5%; }
+        .portal-media-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 40px; }
+        .portal-item { border: var(--border-thick); background: #111; }
+        .portal-item img { width: 100%; height: 500px; object-fit: cover; display: block; }
+
+        @media (max-width: 900px) {
+            .welcome-composition-grid { display: flex; flex-direction: column; justify-content: center; }
+            .layer-img-back, .layer-img-front { display: none; }
+            .welcome-center-stage { width: 100%; grid-column: span 12; }
+            .hero-wrapper { display: flex; flex-direction: column; }
+            .hero-image { width: 100%; height: 45vh; }
+            .hero-title { font-size: 14vw; margin-top: -30px; }
+            .card-large, .card-small { grid-column: span 12; }
+            .studio-container, .portal-media-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body class="locked">
+
+    <div class="welcome-screen" id="welcomeScreen">
+        <div class="welcome-composition-grid">
+            <img class="layer-img-back" src="https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=800&auto=format&fit=crop" alt="Layer Back">
+            <div class="welcome-center-stage">
+                <h1 class="welcome-title">ELENA VANCE<br><span>//</span> CORE SUBSYSTEM</h1>
+                <button class="enter-btn" onclick="enterSite()">ACCESS ARCHIVE</button>
+            </div>
+            <img class="layer-img-front" src="https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=600&auto=format&fit=crop" alt="Layer Front">
+        </div>
+    </div>
+
+    <header>
+        <div class="logo">
+            <svg class="logo-icon" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+                <path d="M28,18 C33,8 61,10 65,22 C69,34 53,35 46,35 C37,35 35,30 41,26 C47,22 59,23 63,34 C65,44 47,46 39,46 C28,46 27,58 38,60 C49,62 67,58 70,45 C73,32 55,32 43,33" stroke="currentColor" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <span class="logo-text">VANCE // CORE</span>
+        </div>
+        <nav>
+            <a href="#portfolio">ARCHIVE</a>
+            <a href="#motion">SLIDESHOW</a>
+            <a href="#studio" class="highlight">STUDIO</a>
+        </nav>
+    </header>
+
+    <section class="hero-section">
+        <div class="hero-wrapper">
+            <img class="hero-image" src="https://images.unsplash.com/photo-1485230895905-ec40ba36b9bc?q=80&w=1200&auto=format&fit=crop" alt="Editorial System Display">
+            <h1 class="hero-title">COUNTER<br>TAILORING</h1>
+        </div>
+    </section>
+
+    <div class="ticker-wrap">
+        <div class="ticker-move">
+            VOGUE ARCHIVES // HARPER'S BAZAAR // ELLE PARIS // NUMÉRO INTERNATIONAL // TOKYO RUNWAY EXPLORATION // 
+            VOGUE ARCHIVES // HARPER'S BAZAAR // ELLE PARIS // NUMÉRO INTERNATIONAL // TOKYO RUNWAY EXPLORATION // 
+        </div>
+    </div>
+
+    <section class="portfolio-section" id="portfolio">
+        <h2 class="section-headline">SELECTED CORE LABELS</h2>
+        <div class="editorial-grid">
+            <div class="album-card card-large" onclick="openPortal('chroma')">
+                <img src="https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=800&auto=format&fit=crop" alt="Chroma System Base">
+                <div class="album-meta"><div class="album-tag">01 // CHROMA VOID SYSTEM</div></div>
+            </div>
+            <div class="album-card card-small" onclick="openPortal('industrial')">
+                <img src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?q=80&w=800&auto=format&fit=crop" alt="Industrial Base">
+                <div class="album-meta"><div class="album-tag">02 // RAW INDUSTRIAL GEOMETRY</div></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="slideshow-section" id="motion">
+        <h2 class="section-headline">EDITORIAL RUNWAY SLIDES</h2>
+        <div class="slider-container">
+            <div class="slider-counter" id="slideCounter">01 / 03</div>
+            
+            <div class="slide active"><img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=1200&auto=format&fit=crop" alt="Runway Slide 1"></div>
+            <div class="slide"><img src="https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=1200&auto=format&fit=crop" alt="Runway Slide 2"></div>
+            <div class="slide"><img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=1200&auto=format&fit=crop" alt="Runway Slide 3"></div>
+
+            <div class="slider-nav">
+                <button class="slider-btn" onclick="changeSlide(-1)">PREV</button>
+                <button class="slider-btn" onclick="changeSlide(1)">NEXT</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="studio-section" id="studio">
+        <h2 class="section-headline">LOOKBOOK STUDIO // GENERATOR</h2>
+        <p style="color: var(--text-muted); margin-top: -40px; margin-bottom: 40px; text-transform: uppercase;">Construct your personal avant-garde fashion layout dynamically below.</p>
+
+        <div class="studio-container">
+            <div class="studio-controls">
+                <div class="control-group">
+                    <label>Collection Label Meta Title</label>
+                    <input type="text" id="inputTitle" value="VOID OVERRIDE">
+                </div>
+
+                <div class="control-group">
+                    <label>Conceptual Narrative Brief</label>
+                    <input type="text" id="inputDesc" value="EXPERIMENTAL CONTEXT HIGHLIGHTING RAW ASYMMETRICAL MOVEMENT SHEETS.">
+                </div>
+
+                <div class="control-group">
+                    <label>Select Production Asset Target</label>
+                    <div class="asset-selector-grid">
+                        <div class="asset-option selected" onclick="selectAsset(this, 'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=800&auto=format&fit=crop')">
+                            <img src="https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=150&auto=format&fit=crop">
+                        </div>
+                        <div class="asset-option" onclick="selectAsset(this, 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=800&auto=format&fit=crop')">
+                            <img src="https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=150&auto=format&fit=crop">
+                        </div>
+                        <div class="asset-option" onclick="selectAsset(this, 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=800&auto=format&fit=crop')">
+                            <img src="https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=150&auto=format&fit=crop">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Post-Processing Filter Treatment</label>
+                    <select id="inputFilter" onchange="generateCustomLookbook()">
+                        <option value="grayscale(1) contrast(1.6)">HIGH IMPACT BRUTALIST MONO</option>
+                        <option value="none">UNTOUCHED SOURCE RAW COLOR</option>
+                        <option value="hue-rotate(290deg) contrast(1.3) saturate(1.8)">CYBERNEON RED INFUSION</option>
+                    </select>
+                </div>
+
+                <button class="action-btn" onclick="generateCustomLookbook()">COMPILE STUDIO PREVIEW</button>
+            </div>
+
+            <div class="studio-preview-box" id="previewBox"></div>
+        </div>
+    </section>
+
+    <div class="world-portal" id="portalWindow">
+        <div class="portal-header">
+            <div class="portal-project-title" id="portalTitle">Label Meta</div>
+            <button class="portal-close-btn" onclick="closePortal()">TERMINATE VIEW</button>
+        </div>
+        <div class="portal-scroll-body">
+            <div class="portal-layout-wrapper">
+                <p id="portalDesc" style="font-size: 1.3rem; margin-bottom: 40px; color: var(--text-muted); text-transform: uppercase; line-height:1.6;"></p>
+                <div class="portal-media-grid" id="portalGrid"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function enterSite() {
+            document.getElementById('welcomeScreen').classList.add('slide-up');
+            document.body.classList.remove('locked');
+        }
+
+        // --- STABLE CONTROLLED EDITORIAL SLIDESHOW SYSTEM CONTROLLER ---
+        let currentSlideIndex = 0;
+        const slides = document.querySelectorAll('.slide');
+        const counterEl = document.getElementById('slideCounter');
+
+        function showSlide(index) {
+            if (index >= slides.length) currentSlideIndex = 0;
+            else if (index < 0) currentSlideIndex = slides.length - 1;
+            else currentSlideIndex = index;
+
+            slides.forEach((slide, i) => {
+                slide.classList.toggle('active', i === currentSlideIndex);
+            });
+            counterEl.textContent = `0${currentSlideIndex + 1} / 0${slides.length}`;
+        }
+
+        function changeSlide(direction) {
+            showSlide(currentSlideIndex + direction);
+        }
+
+        // --- SUB-GALLERIES LINK MAPPINGS ---
+        const archiveDatabase = {
+            chroma: {
+                title: "CHROMA SHADOW MATRIX",
+                desc: "Deep focus photography exploring high contrast silhouette frames against synthetic dark spaces.",
+                assets: [
+                    {src: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=800&auto=format&fit=crop'},
+                    {src: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=800&auto=format&fit=crop'}
+                ]
+            },
+            industrial: {
+                title: "RAW STRUCTURAL GEOMETRIES",
+                desc: "Strictly calculated composition frames shot across raw urban environments and brutalist concrete stages.",
+                assets: [
+                    {src: 'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?q=80&w=800&auto=format&fit=crop'},
+                    {src: 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=800&auto=format&fit=crop'}
+                ]
+            }
+        };
+
+        const portal = document.getElementById('portalWindow');
+        
+        function openPortal(id) {
+            const label = archiveDatabase[id];
+            if(!label) return;
+
+            document.getElementById('portalTitle').textContent = label.title;
+            document.getElementById('portalDesc').textContent = label.desc;
+            
+            const grid = document.getElementById('portalGrid');
+            grid.innerHTML = '';
+
+            label.assets.forEach(asset => {
+                const frame = document.createElement('div');
+                frame.className = 'portal-item';
+                frame.innerHTML = `<img src="${asset.src}" style="filter: grayscale(1) contrast(1.2);">`;
+                grid.appendChild(frame);
+            });
+            
+            document.body.classList.add('locked');
+            portal.classList.add('active');
+        }
+
+        function closePortal() {
+            portal.classList.remove('active');
+            document.body.classList.remove('locked');
+        }
+
+        // --- STUDIO CREATION ENGINE LOGIC ---
+        let selectedSourceUrl = "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=800&auto=format&fit=crop";
+
+        function selectAsset(element, url) {
+            document.querySelectorAll('.asset-option').forEach(opt => opt.classList.remove('selected'));
+            element.classList.add('selected');
+            selectedSourceUrl = url;
+            generateCustomLookbook();
+        }
+
+        function generateCustomLookbook() {
+            const previewBox = document.getElementById('previewBox');
+            const titleVal = document.getElementById('inputTitle').value || "ANONYMOUS LABEL";
+            const descVal = document.getElementById('inputDesc').value || "NO NARRATIVE DETAILED.";
+            const filterVal = document.getElementById('inputFilter').value;
+
+            previewBox.innerHTML = '';
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'user-generated-lookbook';
+
+            const titleElement = document.createElement('h3');
+            titleElement.className = 'user-title-output';
+            titleElement.textContent = titleVal;
+            wrapper.appendChild(titleElement);
+
+            const mediaFrame = document.createElement('div');
+            mediaFrame.className = 'user-media-frame';
+
+            const img = document.createElement('img');
+            img.src = selectedSourceUrl;
+            img.style.filter = filterVal;
+            mediaFrame.appendChild(img);
+            wrapper.appendChild(mediaFrame);
+
+            const descElement = document.createElement('p');
+            descElement.className = 'user-desc-output';
+            descElement.textContent = `SYSTEM COMPILED LOOK // ${descVal}`;
+            wrapper.appendChild(descElement);
+
+            previewBox.appendChild(wrapper);
+        }
+
+        // Auto-run lookbook presentation compilation on script startup execution
+        window.addEventListener('DOMContentLoaded', generateCustomLookbook);
+    </script>
+</body>
+</html>
