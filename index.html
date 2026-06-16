@@ -72,6 +72,37 @@
             align-items: center;
         }
 
+        .slideshow-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .slideshow-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+            z-index: 0;
+        }
+
+        .slideshow-slide.active {
+            opacity: 1;
+        }
+
+        .slideshow-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: grayscale(1) contrast(1.2) brightness(0.4);
+        }
+
         .layer-img-back {
             grid-column: 2 / span 5;
             grid-row: 2 / span 9;
@@ -82,6 +113,7 @@
             border: 1px solid rgba(255, 255, 255, 0.15);
             pointer-events: none;
             z-index: 1;
+            display: none;
         }
 
         .layer-img-front {
@@ -95,6 +127,7 @@
             box-shadow: 15px 15px 0px var(--accent-color);
             pointer-events: none;
             z-index: 3;
+            display: none;
         }
 
         .welcome-center-stage {
@@ -597,6 +630,20 @@
 
     <div class="welcome-screen" id="welcomeScreen">
         <div class="welcome-composition-grid">
+            <div class="slideshow-container">
+                <div class="slideshow-slide active">
+                    <img src="https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=800&auto=format&fit=crop" alt="Intro Slide 1">
+                </div>
+                <div class="slideshow-slide">
+                    <img src="https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=800&auto=format&fit=crop" alt="Intro Slide 2">
+                </div>
+                <div class="slideshow-slide">
+                    <img src="https://images.unsplash.com/photo-1485230895905-ec40ba36b9bc?q=80&w=800&auto=format&fit=crop" alt="Intro Slide 3">
+                </div>
+                <div class="slideshow-slide">
+                    <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=800&auto=format&fit=crop" alt="Intro Slide 4">
+                </div>
+            </div>
             <img class="layer-img-back" src="https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=800&auto=format&fit=crop" alt="Layer Back">
             <div class="welcome-center-stage">
                 <h1 class="welcome-title">ELENA VANCE<br><span>//</span> CORE SUBSYSTEM</h1>
@@ -725,6 +772,27 @@
     </div>
 
     <script>
+        // --- WELCOME SCREEN SLIDESHOW CONTROLLER ---
+        let currentIntroSlide = 0;
+        const introSlides = document.querySelectorAll('.slideshow-slide');
+
+        function showIntroSlide(index) {
+            if (index >= introSlides.length) currentIntroSlide = 0;
+            else if (index < 0) currentIntroSlide = introSlides.length - 1;
+            else currentIntroSlide = index;
+
+            introSlides.forEach((slide, i) => {
+                slide.classList.toggle('active', i === currentIntroSlide);
+            });
+        }
+
+        function rotateIntroSlide() {
+            showIntroSlide(currentIntroSlide + 1);
+        }
+
+        // Auto-rotate intro slideshow every 4 seconds
+        setInterval(rotateIntroSlide, 4000);
+
         function enterSite() {
             document.getElementById('welcomeScreen').classList.add('slide-up');
             document.body.classList.remove('locked');
