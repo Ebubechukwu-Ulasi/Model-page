@@ -33,6 +33,9 @@
             width: 100%;
         }
 
+        /* ensure anchor scrolling and fixed header offset */
+        html { scroll-padding-top: 72px; }
+
         body.locked {
             overflow: hidden;
             height: 100vh;
@@ -189,20 +192,23 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px 5%;
-            background: rgba(5, 5, 5, 0.95);
+            padding: 14px 4%;
+            background: rgba(5, 5, 5, 0.88);
+            backdrop-filter: blur(16px);
+            box-shadow: inset 0 -1px 0 rgba(255,255,255,0.08);
             z-index: 100;
             border-bottom: var(--border-thick);
+            min-height: 58px;
         }
 
         .logo {
             font-family: var(--font-display);
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             text-transform: uppercase;
             letter-spacing: -1px;
             display: inline-flex;
             align-items: center;
-            gap: 14px;
+            gap: 12px;
         }
 
         .logo-icon {
@@ -218,17 +224,131 @@
             letter-spacing: -0.5px;
         }
 
+        nav {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
         nav a {
             text-decoration: none;
             color: var(--text-main);
             margin-left: 30px;
             font-family: var(--font-headers);
-            font-size: 1.1rem;
+            font-size: 1rem;
             text-transform: uppercase;
             letter-spacing: 1px;
+            padding: 10px 0;
+            transition: color 0.2s ease, transform 0.2s ease;
         }
 
-        nav a:hover, nav a.highlight { color: var(--accent-color); }
+        .nav-toggle {
+            display: none;
+            width: 44px;
+            height: 44px;
+            border: 1px solid rgba(255,255,255,0.16);
+            background: transparent;
+            color: var(--text-main);
+            border-radius: 12px;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        .nav-toggle span {
+            display: block;
+            width: 20px;
+            height: 2px;
+            margin: 4px 0;
+            background: currentColor;
+            transition: transform 0.25s ease, opacity 0.25s ease;
+        }
+
+        .nav-toggle.open span:nth-child(1) {
+            transform: translateY(6px) rotate(45deg);
+        }
+
+        .nav-toggle.open span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .nav-toggle.open span:nth-child(3) {
+            transform: translateY(-6px) rotate(-45deg);
+        }
+
+        nav a:hover, nav a.highlight {
+            color: var(--accent-color);
+            transform: translateY(-1px);
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            z-index: 100;
+        }
+
+        .nav-backdrop.visible {
+            display: block;
+            opacity: 1;
+            visibility: visible;
+        }
+
+        @media (max-width: 900px) {
+            .nav-toggle {
+                display: inline-flex;
+            }
+
+            .nav-menu {
+                position: fixed;
+                top: 72px;
+                right: 0;
+                width: min(280px, 100%);
+                height: calc(100vh - 72px);
+                background: rgba(5, 5, 5, 0.96);
+                backdrop-filter: blur(16px);
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 30px 24px;
+                gap: 20px;
+                transform: translateX(110%);
+                transition: transform 0.3s ease;
+                border-left: 1px solid rgba(255,255,255,0.08);
+                z-index: 105;
+            }
+            .nav-menu.open ~ .nav-backdrop,
+            .nav-backdrop.visible {
+                display: block;
+                opacity: 1;
+                visibility: visible;
+            }
+
+            .nav-menu.open {
+                transform: translateX(0);
+            }
+
+            nav a {
+                margin-left: 0;
+                width: 100%;
+                padding: 14px 0;
+                border-bottom: 1px solid rgba(255,255,255,0.08);
+            }
+
+            .hero-section {
+                margin-top: 80px;
+            }
+        }
 
         .hero-section {
             height: 100vh;
@@ -237,7 +357,7 @@
             justify-content: center;
             padding: 0 5%;
             border-bottom: var(--border-thick);
-            margin-top: 40px;
+            margin-top: 72px; /* offset so fixed header doesn't overlap */
         }
 
         .hero-wrapper {
@@ -318,12 +438,18 @@
             position: relative;
         }
 
-        .album-card img {
+        .album-card img,
+        .album-card video {
             width: 100%;
             height: 480px;
             object-fit: cover;
             display: block;
             filter: grayscale(1);
+            background: #000;
+        }
+
+        .album-card video {
+            filter: none;
         }
 
         .album-meta {
@@ -415,159 +541,287 @@
             z-index: 10;
             letter-spacing: 2px;
         }
+        .media-trend-section {
+            padding: 100px 5%;
+            background: #050505;
+            border-bottom: var(--border-thick);
+        }
 
+        .media-trend-section .section-subtitle {
+            font-family: var(--font-headers);
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: -30px;
+            margin-bottom: 40px;
+            display: block;
+        }
+
+        .media-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .media-card,
+        .video-card,
+        .trend-card {
+            background: #111;
+            border: var(--border-thick);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .media-card img,
+        .video-card video {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .media-card .card-copy,
+        .trend-card .card-copy {
+            padding: 25px;
+            color: #ddd;
+            font-family: var(--font-sans);
+            line-height: 1.6;
+        }
+
+        .trend-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            margin-top: 40px;
+        }
+
+        .trend-card {
+            padding: 30px;
+        }
+
+        .trend-film-section {
+            padding: 100px 5%;
+            background: #000;
+            border-bottom: var(--border-thick);
+        }
+
+        .trend-film-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .trend-film-card {
+            background: #111;
+            border: var(--border-thick);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .trend-film-card video,
+        .trend-film-card img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .trend-film-card .card-copy {
+            padding: 25px;
+            color: #ddd;
+            font-family: var(--font-sans);
+            line-height: 1.6;
+        }
+
+        .trend-card h3 {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        .trend-card p {
+            color: #aaa;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 900px) {
+            .media-grid,
+            .trend-grid {
+                grid-template-columns: 1fr;
+            }
+        }
         /* ==========================================================================
-           --- LOOKBOOK STUDIO SYSTEM GENERATOR (VERIFIED VISUAL PREVIEW) ---
+           --- FASHION MOVIE ROOM ---
            ========================================================================== */
         .studio-section {
             padding: 100px 5%;
-            background: #0f0f0f;
+            background: linear-gradient(180deg, #090909 0%, #141414 55%, #030303 100%);
             border-bottom: var(--border-thick);
         }
 
         .studio-container {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 60px;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 50px;
             margin-top: 40px;
+            align-items: start;
         }
 
-        .studio-controls {
-            background: #000000;
+        .movie-screen {
+            position: relative;
             border: var(--border-thick);
-            padding: 40px;
+            overflow: hidden;
+            background: #000;
+            min-height: 520px;
         }
 
-        .control-group { margin-bottom: 25px; }
-        .control-group label {
+        .movie-screen video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
             display: block;
-            font-family: var(--font-headers);
-            font-size: 1.1rem;
-            text-transform: uppercase;
+            background: #000;
+        }
+
+        .screen-overlay {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 24px 30px;
+            background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.92) 100%);
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 20px;
+        }
+
+        .screen-overlay .movie-meta {
+            max-width: 70%;
+        }
+
+        .screen-overlay .movie-meta h3 {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 3vw, 3rem);
             margin-bottom: 10px;
+            letter-spacing: -1px;
+        }
+
+        .screen-overlay .movie-meta p {
+            color: #ccc;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            text-transform: uppercase;
             letter-spacing: 1px;
         }
 
-        .control-group input, .control-group select {
-            width: 100%;
-            padding: 15px;
-            background: #151515;
-            border: 2px solid #333;
-            color: #fff;
-            font-family: var(--font-sans);
-            font-size: 1rem;
-        }
-
-        .control-group input:focus, .control-group select:focus {
-            border-color: var(--accent-color);
-            outline: none;
-        }
-
-        .asset-selector-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-top: 10px;
-        }
-
-        .asset-option {
-            border: 2px solid #333;
-            cursor: pointer;
-            position: relative;
-            height: 110px;
-            background: #222;
-        }
-
-        .asset-option img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            filter: grayscale(1);
-        }
-
-        .asset-option.selected { border-color: var(--accent-color); }
-        .asset-option.selected::after {
-            content: 'SELECTED';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: var(--accent-color);
-            color: #fff;
+        .screen-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 18px;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(0,0,0,0.6);
             font-family: var(--font-headers);
-            font-size: 0.65rem;
-            text-align: center;
-            padding: 2px 0;
-        }
-
-        .action-btn {
-            width: 100%;
-            background: var(--text-main);
-            color: #000;
-            padding: 20px;
-            font-family: var(--font-headers);
-            font-size: 1.2rem;
             text-transform: uppercase;
-            cursor: pointer;
-            font-weight: 700;
-            border: none;
-            transition: background 0.2s;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
         }
 
-        .action-btn:hover { background: var(--accent-color); color: #fff; }
+        .playlist-panel {
+            display: grid;
+            gap: 20px;
+        }
 
-        /* Studio Live Preview Box Output Container */
-        .studio-preview-box {
-            border: 4px dashed #444;
-            padding: 30px;
+        .playlist-card {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 18px;
+            border: 2px solid #1f1f1f;
+            padding: 16px;
+            background: #0d0d0d;
+            cursor: pointer;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+
+        .playlist-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent-color);
+        }
+
+        .playlist-card.selected {
+            border-color: var(--accent-color);
+        }
+
+        .playlist-card img {
+            width: 120px;
+            height: 70px;
+            object-fit: cover;
+            display: block;
+            border: 1px solid #222;
+        }
+
+        .playlist-details {
             display: flex;
             flex-direction: column;
             justify-content: center;
-            background: #050505;
-            min-height: 550px;
         }
 
-        .preview-placeholder {
-            text-align: center;
-            color: var(--text-muted);
+        .playlist-details h4 {
             font-family: var(--font-headers);
-            font-size: 1.5rem;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
             text-transform: uppercase;
         }
 
-        .user-generated-lookbook { width: 100%; }
-        .user-generated-lookbook .user-title-output {
-            font-family: var(--font-display);
-            font-size: 2.5rem;
-            text-transform: uppercase;
-            border-bottom: var(--border-thick);
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-            line-height: 1;
-        }
-
-        .user-media-frame {
-            border: var(--border-thick);
-            margin-bottom: 20px;
-            width: 100%;
-            height: 380px;
-            background: #111;
-            overflow: hidden;
-        }
-
-        .user-media-frame img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
-
-        .user-desc-output {
-            font-size: 1rem;
-            color: #dddddd;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+        .playlist-details p {
+            color: #aaa;
+            font-size: 0.95rem;
             line-height: 1.4;
+        }
+
+        .movie-room-info {
+            border: 2px solid #222;
+            padding: 30px;
+            background: #090909;
+        }
+
+        .movie-room-info h3 {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            margin-bottom: 18px;
+            text-transform: uppercase;
+        }
+
+        .movie-room-info p {
+            color: #ccc;
+            line-height: 1.7;
+            letter-spacing: 0.5px;
+            margin-bottom: 24px;
+        }
+
+        .movie-room-info small {
+            display: block;
+            margin-top: 10px;
+            color: #777;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 980px) {
+            .studio-container { grid-template-columns: 1fr; }
+            .screen-overlay { flex-direction: column; align-items: flex-start; }
+            .playlist-card { grid-template-columns: 1fr; }
+            .playlist-card img { width: 100%; height: 180px; }
         }
 
         /* --- IMMERSIVE EXPANSION MODAL OVERLAY --- */
@@ -612,7 +866,13 @@
         .portal-scroll-body { flex: 1; overflow-y: auto; padding: 60px 5%; }
         .portal-media-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 40px; }
         .portal-item { border: var(--border-thick); background: #111; }
-        .portal-item img { width: 100%; height: 500px; object-fit: cover; display: block; }
+        .portal-item img,
+        .portal-item video,
+        .video-card video,
+        .user-media-frame video,
+        .movie-screen video { width: 100%; height: 100%; object-fit: cover; display: block; background: #000; }
+
+        .user-media-frame video { height: 100%; }
 
         @media (max-width: 900px) {
             .welcome-composition-grid { display: flex; flex-direction: column; justify-content: center; }
@@ -624,6 +884,24 @@
             .card-large, .card-small { grid-column: span 12; }
             .studio-container, .portal-media-grid { grid-template-columns: 1fr; }
         }
+
+        /* Tablet adjustments */
+        @media (max-width: 1024px) {
+            header { padding: 12px 4%; min-height: 56px; }
+            .logo { font-size: 1.4rem; gap: 10px; }
+            .hero-section { margin-top: 66px; }
+            .enter-btn { padding: 14px 36px; }
+        }
+
+        /* Narrow mobile tweaks */
+        @media (max-width: 600px) {
+            header { padding: 10px 4%; min-height: 56px; }
+            .logo-text { font-size: 0.95rem; }
+            .nav-toggle { width: 40px; height: 40px; }
+            .enter-btn { padding: 12px 24px; font-size: 0.95rem; }
+            .hero-image { height: 40vh; }
+            .hero-title { font-size: 18vw; }
+        }
     </style>
 </head>
 <body class="locked">
@@ -632,24 +910,24 @@
         <div class="welcome-composition-grid">
             <div class="slideshow-container">
                 <div class="slideshow-slide active">
-                    <img src="https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=800&auto=format&fit=crop" alt="Intro Slide 1">
+                    <img src="https://picsum.photos/seed/vision-future1/1200/800" alt="Intro Slide 1">
                 </div>
                 <div class="slideshow-slide">
-                    <img src="https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=800&auto=format&fit=crop" alt="Intro Slide 2">
+                    <img src="https://picsum.photos/seed/vision-future2/1200/800" alt="Intro Slide 2">
                 </div>
                 <div class="slideshow-slide">
-                    <img src="https://images.unsplash.com/photo-1485230895905-ec40ba36b9bc?q=80&w=800&auto=format&fit=crop" alt="Intro Slide 3">
+                    <img src="https://picsum.photos/seed/vision-future3/1200/800" alt="Intro Slide 3">
                 </div>
                 <div class="slideshow-slide">
-                    <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=800&auto=format&fit=crop" alt="Intro Slide 4">
+                    <img src="https://picsum.photos/seed/vision-future4/1200/800" alt="Intro Slide 4">
                 </div>
             </div>
-            <img class="layer-img-back" src="https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=800&auto=format&fit=crop" alt="Layer Back">
+            <img class="layer-img-back" src="https://picsum.photos/seed/lens-back/800/800" alt="Layer Back">
             <div class="welcome-center-stage">
-                <h1 class="welcome-title">ELENA VANCE<br><span>//</span> CORE SUBSYSTEM</h1>
-                <button class="enter-btn" onclick="enterSite()">ACCESS ARCHIVE</button>
+                <h1 class="welcome-title">ELENA VANCE<br><span>//</span> FUTURE LAB</h1>
+                <button class="enter-btn" onclick="enterSite()">ENTER ARCHIVE</button>
             </div>
-            <img class="layer-img-front" src="https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=600&auto=format&fit=crop" alt="Layer Front">
+            <img class="layer-img-front" src="https://picsum.photos/seed/lens-front/600/900" alt="Layer Front">
         </div>
     </div>
 
@@ -660,17 +938,23 @@
             </svg>
             <span class="logo-text">VANCE // CORE</span>
         </div>
-        <nav>
-            <a href="#portfolio">ARCHIVE</a>
-            <a href="#motion">SLIDESHOW</a>
-            <a href="#studio" class="highlight">STUDIO</a>
+        <button class="nav-toggle" type="button" aria-label="Toggle navigation" onclick="toggleNav()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <nav class="nav-menu">
+            <a href="#portfolio" onclick="closeNav()">LABELS</a>
+            <a href="#motion" onclick="closeNav()">MOTION</a>
+            <a href="#studio" class="highlight" onclick="closeNav()">STUDIO</a>
         </nav>
     </header>
+    <div class="nav-backdrop" onclick="closeNav()" aria-hidden="true"></div>
 
     <section class="hero-section">
         <div class="hero-wrapper">
-            <img class="hero-image" src="https://images.unsplash.com/photo-1485230895905-ec40ba36b9bc?q=80&w=1200&auto=format&fit=crop" alt="Editorial System Display">
-            <h1 class="hero-title">COUNTER<br>TAILORING</h1>
+            <img class="hero-image" src="https://picsum.photos/seed/future-hero/1200/800" alt="Editorial System Display">
+            <h1 class="hero-title">NOIR<br>TAILORING</h1>
         </div>
     </section>
 
@@ -682,14 +966,18 @@
     </div>
 
     <section class="portfolio-section" id="portfolio">
-        <h2 class="section-headline">SELECTED CORE LABELS</h2>
+        <h2 class="section-headline">SELECTED FUTURE LABELS</h2>
         <div class="editorial-grid">
             <div class="album-card card-large" onclick="openPortal('chroma')">
-                <img src="https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=800&auto=format&fit=crop" alt="Chroma System Base">
+                <img src="https://picsum.photos/seed/chroma-future/1000/1000" alt="Chroma System Base">
                 <div class="album-meta"><div class="album-tag">01 // CHROMA VOID SYSTEM</div></div>
             </div>
             <div class="album-card card-small" onclick="openPortal('industrial')">
-                <img src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?q=80&w=800&auto=format&fit=crop" alt="Industrial Base">
+                <video controls muted playsinline poster="https://picsum.photos/seed/industrial-future/1000/600">
+                    <source src="https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4" type="video/mp4">
+                    <source src="https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.webm" type="video/webm">
+                    Your browser does not support video playback.
+                </video>
                 <div class="album-meta"><div class="album-tag">02 // RAW INDUSTRIAL GEOMETRY</div></div>
             </div>
         </div>
@@ -700,9 +988,9 @@
         <div class="slider-container">
             <div class="slider-counter" id="slideCounter">01 / 03</div>
             
-            <div class="slide active"><img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=1200&auto=format&fit=crop" alt="Runway Slide 1"></div>
-            <div class="slide"><img src="https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=1200&auto=format&fit=crop" alt="Runway Slide 2"></div>
-            <div class="slide"><img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=1200&auto=format&fit=crop" alt="Runway Slide 3"></div>
+            <div class="slide active"><img src="https://picsum.photos/seed/runway4/1200/800" alt="Runway Slide 1"></div>
+            <div class="slide"><img src="https://picsum.photos/seed/runway5/1200/800" alt="Runway Slide 2"></div>
+            <div class="slide"><img src="https://picsum.photos/seed/runway6/1200/800" alt="Runway Slide 3"></div>
 
             <div class="slider-nav">
                 <button class="slider-btn" onclick="changeSlide(-1)">PREV</button>
@@ -711,57 +999,123 @@
         </div>
     </section>
 
+    <section class="media-trend-section" id="mediaTrends">
+        <h2 class="section-headline">MEDIA GRID // TRENDS + FEATURES</h2>
+        <span class="section-subtitle">Visual reports, motion briefs, and next-wave wardrobe signals.</span>
+
+        <div class="media-grid">
+            <div class="media-card">
+                <img src="https://picsum.photos/seed/media-story1/1000/1500" alt="Visual Install Report">
+                <div class="card-copy">
+                    <h3>ARCHIVE FRAMEWORK</h3>
+                    <p>Layered visual narratives that explore the next season of dark-luxe wardrobe architecture.</p>
+                </div>
+            </div>
+            <div class="video-card">
+                <video controls muted playsinline preload="metadata" poster="https://picsum.photos/seed/videoPoster-luxe/1000/600">
+                    <source src="https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+                    <source src="https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.webm" type="video/webm">
+                    Your browser does not support video playback.
+                </video>
+                <div class="card-copy">
+                    <h3>FRAMEWORK MOTION</h3>
+                    <p>Motion study for elevated shirt silhouettes, cut in shadow and saturated in urban texture.</p>
+                </div>
+            </div>
+            <div class="media-card">
+                <img src="https://picsum.photos/seed/media-style2/1000/667" alt="Shirt Trend Capture">
+                <div class="card-copy">
+                    <h3>TEXTURE TREND</h3>
+                    <p>Minimal shirt systems paired with contrasting volume, engineered for asymmetric runway movement.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="trend-grid">
+            <div class="trend-card">
+                <h3>SHIRT TREND 01</h3>
+                <p>Oversized collar frames with structural sleeve sculpting and tonal hardware details.</p>
+            </div>
+            <div class="trend-card">
+                <h3>SHIRT TREND 02</h3>
+                <p>Deconstructed banded hems combining mesh panels and matte technical fabrics.</p>
+            </div>
+            <div class="trend-card">
+                <h3>SHIRT TREND 03</h3>
+                <p>Futuristic drape, panel offsets, and contrast seam lines that redefine smart layering.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="trend-film-section" id="shirtTrends">
+        <h2 class="section-headline">SHIRT SIGNALS // CINEMATIC REELS</h2>
+        <span class="section-subtitle">Garment motion studies and editorial shirt stories across film and stills.</span>
+        <div class="trend-film-grid">
+            <div class="trend-film-card">
+                <video controls muted playsinline loop poster="https://picsum.photos/seed/shirtvideo1-new/1000/600">
+                    <source src="https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4" type="video/mp4">
+                    <source src="https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.webm" type="video/webm">
+                    Your browser does not support video playback.
+                </video>
+                <div class="card-copy">
+                    <h3>SHIRT SIGNAL FILM</h3>
+                    <p>High-energy shirt motion captured in cinematic rehearsal rooms and luminous street study.</p>
+                </div>
+            </div>
+            <div class="trend-film-card">
+                <img src="https://picsum.photos/seed/shirtstill-modern/1000/600" alt="Shirt movement still">
+                <div class="card-copy">
+                    <h3>TEXTURED SHIRT STUDY</h3>
+                    <p>Layered shirts with tactile finishes, staged in raw editorial light and sculptural composition.</p>
+                </div>
+            </div>
+            <div class="trend-film-card">
+                <video controls muted playsinline loop poster="https://picsum.photos/seed/shirtvideo2-modern/1000/600">
+                    <source src="https://storage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4" type="video/mp4">
+                    <source src="https://storage.googleapis.com/gtv-videos-bucket/sample/Sintel.webm" type="video/webm">
+                    Your browser does not support video playback.
+                </video>
+                <div class="card-copy">
+                    <h3>MODERN CUT SEQUENCE</h3>
+                    <p>An experimental fashion film mixing tailored shirt systems with kinetic camera movement.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <section class="studio-section" id="studio">
-        <h2 class="section-headline">LOOKBOOK STUDIO // GENERATOR</h2>
-        <p style="color: var(--text-muted); margin-top: -40px; margin-bottom: 40px; text-transform: uppercase;">Construct your personal avant-garde fashion layout dynamically below.</p>
+        <h2 class="section-headline">FASHION MOVIE ROOM</h2>
+        <p style="color: var(--text-muted); margin-top: -40px; margin-bottom: 40px; text-transform: uppercase;">A cinematic fashion lounge with a responsive theater and curated motion programs.</p>
 
         <div class="studio-container">
-            <div class="studio-controls">
-                <div class="control-group">
-                    <label>Collection Label Meta Title</label>
-                    <input type="text" id="inputTitle" value="VOID OVERRIDE">
-                </div>
-
-                <div class="control-group">
-                    <label>Conceptual Narrative Brief</label>
-                    <input type="text" id="inputDesc" value="EXPERIMENTAL CONTEXT HIGHLIGHTING RAW ASYMMETRICAL MOVEMENT SHEETS.">
-                </div>
-
-                <div class="control-group">
-                    <label>Select Production Asset Target</label>
-                    <div class="asset-selector-grid">
-                        <div class="asset-option selected" onclick="selectAsset(this, 'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=800&auto=format&fit=crop')">
-                            <img src="https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=150&auto=format&fit=crop">
-                        </div>
-                        <div class="asset-option" onclick="selectAsset(this, 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=800&auto=format&fit=crop')">
-                            <img src="https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=150&auto=format&fit=crop">
-                        </div>
-                        <div class="asset-option" onclick="selectAsset(this, 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=800&auto=format&fit=crop')">
-                            <img src="https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=150&auto=format&fit=crop">
-                        </div>
+            <div class="movie-screen">
+                <video id="mainMovieScreen" controls muted playsinline preload="metadata" poster="https://picsum.photos/seed/hero-screen-future/1400/780">
+                    <source src="https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4" type="video/mp4">
+                    <source src="https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.webm" type="video/webm">
+                    Your browser does not support video playback.
+                </video>
+                <div class="screen-overlay">
+                    <div class="movie-meta">
+                        <h3 id="movieTitle">BUBBLE CHIC</h3>
+                        <p id="movieDesc">A runway-inspired fashion film full of light, texture, and cinematic movement.</p>
                     </div>
+                    <span class="screen-status">NOW PLAYING</span>
                 </div>
-
-                <div class="control-group">
-                    <label>Post-Processing Filter Treatment</label>
-                    <select id="inputFilter" onchange="generateCustomLookbook()">
-                        <option value="grayscale(1) contrast(1.6)">HIGH IMPACT BRUTALIST MONO</option>
-                        <option value="none">UNTOUCHED SOURCE RAW COLOR</option>
-                        <option value="hue-rotate(290deg) contrast(1.3) saturate(1.8)">CYBERNEON RED INFUSION</option>
-                    </select>
-                </div>
-
-                <button class="action-btn" onclick="generateCustomLookbook()">COMPILE STUDIO PREVIEW</button>
             </div>
 
-            <div class="studio-preview-box" id="previewBox"></div>
+            <div class="movie-room-info">
+                <h3>Movie Room Playlist</h3>
+                <p>Choose a fashion film from the lounge. Each reel brings a unique story, from glossy editorial movement to raw streetwear cinema.</p>
+                <small>Tip: tap a preview card to switch the main screen.</small>
+                <div class="playlist-panel" id="moviePlaylist"></div>
+            </div>
         </div>
     </section>
 
     <div class="world-portal" id="portalWindow">
         <div class="portal-header">
-            <div class="portal-project-title" id="portalTitle">Label Meta</div>
-            <button class="portal-close-btn" onclick="closePortal()">TERMINATE VIEW</button>
+            <div class="portal-project-title" id="portalTitle">Archive Portal</div>
+            <button class="portal-close-btn" onclick="closePortal()">EXIT PORTAL</button>
         </div>
         <div class="portal-scroll-body">
             <div class="portal-layout-wrapper">
@@ -824,16 +1178,18 @@
                 title: "CHROMA SHADOW MATRIX",
                 desc: "Deep focus photography exploring high contrast silhouette frames against synthetic dark spaces.",
                 assets: [
-                    {src: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=800&auto=format&fit=crop'},
-                    {src: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=800&auto=format&fit=crop'}
+                    {type: 'image', src: 'https://picsum.photos/seed/archive1-future/800/800'},
+                    {type: 'video', src: 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4', webm: 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.webm', poster: 'https://picsum.photos/seed/archiveVideo-future/800/450'},
+                    {type: 'image', src: 'https://picsum.photos/seed/archive2-future/800/800'}
                 ]
             },
             industrial: {
                 title: "RAW STRUCTURAL GEOMETRIES",
                 desc: "Strictly calculated composition frames shot across raw urban environments and brutalist concrete stages.",
                 assets: [
-                    {src: 'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?q=80&w=800&auto=format&fit=crop'},
-                    {src: 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=800&auto=format&fit=crop'}
+                    {type: 'video', src: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4', webm: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.webm', poster: 'https://picsum.photos/seed/industrialVideo-modern/800/450'},
+                    {type: 'image', src: 'https://picsum.photos/seed/archive3-modern/850/850'},
+                    {type: 'image', src: 'https://picsum.photos/seed/archive4-modern/850/850'}
                 ]
             }
         };
@@ -853,7 +1209,17 @@
             label.assets.forEach(asset => {
                 const frame = document.createElement('div');
                 frame.className = 'portal-item';
-                frame.innerHTML = `<img src="${asset.src}" style="filter: grayscale(1) contrast(1.2);">`;
+                if (asset.type === 'video') {
+                    frame.innerHTML = `
+                        <video controls muted playsinline poster="${asset.poster}">
+                            <source src="${asset.src}" type="video/mp4">
+                            ${asset.webm ? `<source src="${asset.webm}" type="video/webm">` : ''}
+                            Your browser does not support video playback.
+                        </video>
+                    `;
+                } else {
+                    frame.innerHTML = `<img src="${asset.src}" style="filter: grayscale(1) contrast(1.2);">`;
+                }
                 grid.appendChild(frame);
             });
             
@@ -866,51 +1232,123 @@
             document.body.classList.remove('locked');
         }
 
-        // --- STUDIO CREATION ENGINE LOGIC ---
-        let selectedSourceUrl = "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=800&auto=format&fit=crop";
-
-        function selectAsset(element, url) {
-            document.querySelectorAll('.asset-option').forEach(opt => opt.classList.remove('selected'));
-            element.classList.add('selected');
-            selectedSourceUrl = url;
-            generateCustomLookbook();
+        function toggleNav() {
+            const navMenu = document.querySelector('.nav-menu');
+            const backdrop = document.querySelector('.nav-backdrop');
+            const toggle = document.querySelector('.nav-toggle');
+            navMenu.classList.toggle('open');
+            const isOpen = navMenu.classList.contains('open');
+            backdrop.classList.toggle('visible', isOpen);
+            toggle.classList.toggle('open', isOpen);
         }
 
-        function generateCustomLookbook() {
-            const previewBox = document.getElementById('previewBox');
-            const titleVal = document.getElementById('inputTitle').value || "ANONYMOUS LABEL";
-            const descVal = document.getElementById('inputDesc').value || "NO NARRATIVE DETAILED.";
-            const filterVal = document.getElementById('inputFilter').value;
-
-            previewBox.innerHTML = '';
-
-            const wrapper = document.createElement('div');
-            wrapper.className = 'user-generated-lookbook';
-
-            const titleElement = document.createElement('h3');
-            titleElement.className = 'user-title-output';
-            titleElement.textContent = titleVal;
-            wrapper.appendChild(titleElement);
-
-            const mediaFrame = document.createElement('div');
-            mediaFrame.className = 'user-media-frame';
-
-            const img = document.createElement('img');
-            img.src = selectedSourceUrl;
-            img.style.filter = filterVal;
-            mediaFrame.appendChild(img);
-            wrapper.appendChild(mediaFrame);
-
-            const descElement = document.createElement('p');
-            descElement.className = 'user-desc-output';
-            descElement.textContent = `SYSTEM COMPILED LOOK // ${descVal}`;
-            wrapper.appendChild(descElement);
-
-            previewBox.appendChild(wrapper);
+        function closeNav() {
+            const navMenu = document.querySelector('.nav-menu');
+            const backdrop = document.querySelector('.nav-backdrop');
+            const toggle = document.querySelector('.nav-toggle');
+            navMenu.classList.remove('open');
+            backdrop.classList.remove('visible');
+            toggle.classList.remove('open');
         }
 
-        // Auto-run lookbook presentation compilation on script startup execution
-        window.addEventListener('DOMContentLoaded', generateCustomLookbook);
+        // --- MOVIE ROOM VIDEO SELECTION ---
+        const movieCatalog = [
+            {
+                title: 'BUBBLE CHIC',
+                desc: 'A runway-inspired fashion film layered in light, texture, and cinematic movement.',
+                src: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+                webm: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.webm',
+                poster: 'https://picsum.photos/seed/movie1-future/1400/780',
+                thumb: 'https://picsum.photos/seed/thumb1-future/320/180'
+            },
+            {
+                title: 'NEON HOUSE',
+                desc: 'Noir streetwear visuals layered with neon pulse and kinetic silhouettes.',
+                src: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
+                webm: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.webm',
+                poster: 'https://picsum.photos/seed/movie2-neon/1400/780',
+                thumb: 'https://picsum.photos/seed/thumb2-neon/320/180'
+            },
+            {
+                title: 'CATWALK REWIND',
+                desc: 'Archive footage reimagined as a glossy film for modern runway culture.',
+                src: 'https://storage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
+                webm: 'https://storage.googleapis.com/gtv-videos-bucket/sample/Sintel.webm',
+                poster: 'https://picsum.photos/seed/movie3-rewind/1400/780',
+                thumb: 'https://picsum.photos/seed/thumb3-rewind/320/180'
+            },
+            {
+                title: 'MIDNIGHT LAUNCH',
+                desc: 'A spectral fashion story with dynamic motion and futuristic silhouettes.',
+                src: 'https://storage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4',
+                webm: 'https://storage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.webm',
+                poster: 'https://picsum.photos/seed/movie4-midnight/1400/780',
+                thumb: 'https://picsum.photos/seed/thumb4-midnight/320/180'
+            }
+        ];
+
+        let selectedMovieIndex = 0;
+
+        function createPlaylist() {
+            const playlist = document.getElementById('moviePlaylist');
+            playlist.innerHTML = '';
+            movieCatalog.forEach((movie, index) => {
+                const card = document.createElement('button');
+                card.type = 'button';
+                card.className = 'playlist-card';
+                card.onclick = () => selectMovie(index);
+                card.innerHTML = `
+                    <img src="${movie.thumb}" alt="${movie.title} thumb">
+                    <div class="playlist-details">
+                        <h4>${movie.title}</h4>
+                        <p>${movie.desc}</p>
+                    </div>
+                `;
+                playlist.appendChild(card);
+            });
+            updatePlaylistUI();
+        }
+
+        function selectMovie(index) {
+            selectedMovieIndex = index;
+            updateMovieScreen();
+            updatePlaylistUI();
+        }
+
+        function updateMovieScreen() {
+            const movie = movieCatalog[selectedMovieIndex];
+            const screen = document.getElementById('mainMovieScreen');
+            const title = document.getElementById('movieTitle');
+            const desc = document.getElementById('movieDesc');
+
+            screen.pause();
+            screen.poster = movie.poster;
+            const sources = screen.querySelectorAll('source');
+            if (sources.length >= 1) {
+                sources[0].src = movie.src;
+            }
+            if (sources.length >= 2 && movie.webm) {
+                sources[1].src = movie.webm;
+            }
+            screen.load();
+            screen.play().catch(() => {});
+
+            title.textContent = movie.title;
+            desc.textContent = movie.desc;
+        }
+
+        function updatePlaylistUI() {
+            document.querySelectorAll('.playlist-card').forEach((card, idx) => {
+                card.classList.toggle('selected', idx === selectedMovieIndex);
+            });
+        }
+
+        // Initialize page sections and movie room playlist when DOM is ready
+        window.addEventListener('DOMContentLoaded', () => {
+            showSlide(0);
+            createPlaylist();
+            updateMovieScreen();
+        });
     </script>
 </body>
 </html>
